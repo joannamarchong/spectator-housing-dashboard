@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Housing | The Spectator Data Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Source Sans 3', -apple-system, sans-serif;
+  background: #fff;
+  color: #222;
+  line-height: 1.5;
+}
+
+/* ── HEADER ── */
+.site-header {
+  text-align: center;
+  padding: 40px 24px 12px;
+}
+.site-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: #222;
+}
+
+/* ── NAV PILLS ── */
+.nav-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 24px 32px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.nav-pill {
+  display: inline-block;
+  padding: 7px 20px;
+  border: 1.5px solid #c0392b;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #c0392b;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-pill:hover {
+  background: #fdf0ee;
+}
+.nav-pill.active {
+  background: #c0392b;
+  color: #fff;
+}
+
+.divider {
+  max-width: 1100px;
+  margin: 0 auto;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+/* ── CHART GRID ── */
+.chart-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.chart-block {
+  padding: 36px 32px 28px;
+  border-bottom: 1px solid #eee;
+}
+.chart-block:nth-child(odd) {
+  border-right: 1px solid #eee;
+}
+.chart-block.full {
+  grid-column: 1 / -1;
+  border-right: none;
+}
+
+.chart-headline {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.chart-deck {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 300px;
+}
+.chart-wrap.short { height: 260px; }
+.chart-wrap.tall { height: 380px; }
+.chart-foot {
+  font-size: 11.5px;
+  color: #999;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+.chart-foot a {
+  color: #c0392b;
+  text-decoration: underline;
+}
+
+/* ── STAT CALLOUT (matching their headline style) ── */
+.stat-line {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #111;
+  margin-bottom: 2px;
+}
+.stat-line strong {
+  font-weight: 700;
+}
+
+/* ── REGION TABLE ── */
+.region-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.region-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #999;
+  padding: 6px 0;
+  border-bottom: 1.5px solid #222;
+}
+.region-table td {
+  padding: 7px 0;
+  border-bottom: 1px solid #eee;
+}
+.region-table .bar-cell {
+  width: 140px;
+}
+.ratio-bar {
+  display: inline-block;
+  height: 14px;
+  background: #c0392b;
+  opacity: 0.65;
+  vertical-align: middle;
+  border-radius: 1px;
+}
+.region-table .val {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  width: 50px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .chart-grid { grid-template-columns: 1fr; }
+  .chart-block:nth-child(odd) { border-right: none; }
+  .site-title { font-size: 24px; }
+  .chart-headline { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="site-header">
+  <div class="site-title">The Spectator data tracker. Updated daily.</div>
+</div>
+
+<!-- NAV -->
+<nav class="nav-pills">
+  <a class="nav-pill" href="#">Home</a>
+  <a class="nav-pill" href="#">Keir's Targets</a>
+  <a class="nav-pill" href="#">Polls</a>
+  <a class="nav-pill" href="#">Economy ▽</a>
+  <a class="nav-pill" href="#">Health ▽</a>
+  <a class="nav-pill" href="#">Welfare</a>
+  <a class="nav-pill" href="#">Migration</a>
+  <a class="nav-pill" href="#">Scotland ▽</a>
+  <a class="nav-pill" href="#">Energy ▽</a>
+  <a class="nav-pill" href="#">Defence</a>
+  <a class="nav-pill active" href="#">Housing</a>
+  <a class="nav-pill" href="#">MISC ▽</a>
+  <a class="nav-pill" href="#">S.P.A.F.F.</a>
+</nav>
+
+<hr class="divider">
+
+<!-- CHARTS -->
+<div class="chart-grid">
+
+  <!-- 1. Affordability ratio -->
+  <div class="chart-block">
+    <div class="chart-headline">Housing affordability ratio: 7.6</div>
+    <div class="chart-deck">Median house price to median earnings, England, 1997–2025</div>
+    <div class="chart-wrap">
+      <canvas id="affordChart"></canvas>
+    </div>
+    <div class="chart-foot">
+      Ratio of 5 or below generally considered affordable. Peak of 9.0 in 2021.<br>
+      Chart: The Spectator · Source: <a href="#">ONS Housing affordability</a>, March 2026
+    </div>
+  </div>
+
+  <!-- 2. Rents -->
+  <div class="chart-block">
+    <div class="chart-headline">Average rent: £1,430/month</div>
+    <div class="chart-deck">Average monthly private rent, England</div>
+    <div class="chart-wrap">
+      <canvas id="rentChart"></canvas>
+    </div>
+    <div class="chart-foot">
+      Up 3.6% in the 12 months to Feb 2026. Wales: £828. Scotland: £1,022.<br>
+      Chart: The Spectator · Source: <a href="#">ONS private rental index</a>
+    </div>
+  </div>
+
+  <!-- 3. Housebuilding -->
+  <div class="chart-block">
+    <div class="chart-headline">Homes built: 221,000 last year</div>
+    <div class="chart-deck">Net additional dwellings, England. Labour's target is 370,000/yr.</div>
+    <div class="chart-wrap">
+      <canvas id="buildChart"></canvas>
+    </div>
+    <div class="chart-foot">
+      England has never built 300,000 homes in a single year since records began in 2005.<br>
+      Chart: The Spectator · Source: <a href="#">DLUHC net additional dwellings</a>
+    </div>
+  </div>
+
+  <!-- 4. Mortgage rates -->
+  <div class="chart-block">
+    <div class="chart-headline">Mortgage rates: five-year fix at 5.77%</div>
+    <div class="chart-deck">Average 2-year and 5-year fixed mortgage rates, 2019–2026</div>
+    <div class="chart-wrap">
+      <canvas id="mortgageChart"></canvas>
+    </div>
+    <div class="chart-foot">
+      Figures to Thursday 16 Apr.<br>
+      Chart: The Spectator · Source: <a href="#">Moneyfacts</a>
+    </div>
+  </div>
+
+  <!-- 5. Tenure -->
+  <div class="chart-block">
+    <div class="chart-headline">Home ownership: down from 71% to 64%</div>
+    <div class="chart-deck">Household tenure, England (%)</div>
+    <div class="chart-wrap">
+      <canvas id="tenureChart"></canvas>
+    </div>
+    <div class="chart-foot">
+      Private renting has nearly doubled since 2003. Social rented sector has shrunk.<br>
+      Chart: The Spectator · Source: <a href="#">English Housing Survey</a>
+    </div>
+  </div>
+
+  <!-- 6. Regional table -->
+  <div class="chart-block">
+    <div class="chart-headline">Regional affordability, 2025</div>
+    <div class="chart-deck">House price to earnings ratio by region</div>
+    <table class="region-table" id="regionTable">
+      <thead><tr><th>Region</th><th>Ratio</th><th class="bar-cell"></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="chart-foot" style="margin-top:16px">
+      Kensington & Chelsea is the least affordable local authority at 25.2.<br>
+      Hyndburn and Kingston upon Hull are the most affordable at 4.1.<br>
+      Source: <a href="#">ONS Housing affordability in England and Wales, 2025</a>
+    </div>
+  </div>
+
+  <!-- 7. First-time buyers – full width -->
+  <div class="chart-block full">
+    <div class="chart-headline">First-time buyers: older and paying more</div>
+    <div class="chart-deck">Median age and average deposit of first-time buyers, UK</div>
+    <div class="chart-wrap short">
+      <canvas id="ftbChart"></canvas>
+    </div>
+    <div class="chart-foot">
+      The average first-time buyer is now 33, up from 29 in 2007. Deposits have more than doubled.<br>
+      Chart: The Spectator · Source: <a href="#">Halifax / UK Finance</a>
+    </div>
+  </div>
+
+  <!-- 8. Extremes – full width -->
+  <div class="chart-block full">
+    <div class="chart-headline">The most and least affordable places to buy</div>
+    <div class="chart-deck">House price to earnings ratio, selected local authorities, England & Wales, 2025</div>
+    <div class="chart-wrap tall">
+      <canvas id="extremesChart"></canvas>
+    </div>
+    <div class="chart-foot">
+      In 1997, 88% of local authorities had homes costing less than 5× earnings. By 2025, only 7% do.<br>
+      Chart: The Spectator · Source: <a href="#">ONS Housing affordability in England and Wales, 2025</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Palette ──
+const RED = '#c0392b';
+const BLUE = '#2166ac';
+const GOLD = '#b8860b';
+const GREEN = '#27774e';
+const GREY = '#aaa';
+const DARK = '#222';
+
+// ── Defaults ──
+Chart.defaults.font.family = "'Source Sans 3', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#888';
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyleWidth = 10;
+Chart.defaults.plugins.legend.labels.padding = 14;
+Chart.defaults.plugins.legend.labels.font = { size: 12, weight: '500' };
+
+const gridStyle = { color: 'rgba(0,0,0,0.06)', drawBorder: false };
+const noGrid = { display: false };
+const tPad = { padding: 8 };
+
+// ── 1. Affordability ──
+const aYrs = ['1997','1999','2001','2003','2005','2007','2009','2011','2013','2015','2017','2019','2021','2023','2025'];
+const aVal = [3.5, 3.9, 4.5, 5.8, 6.8, 7.2, 6.3, 6.7, 6.7, 7.5, 7.9, 7.8, 9.0, 8.1, 7.6];
+
+new Chart(document.getElementById('affordChart'), {
+  type: 'line',
+  data: {
+    labels: aYrs,
+    datasets: [{
+      label: 'Affordability ratio',
+      data: aVal,
+      borderColor: RED,
+      borderWidth: 2,
+      tension: 0.35,
+      pointRadius: 0,
+      pointHoverRadius: 4
+    },{
+      label: 'Affordable threshold',
+      data: Array(aYrs.length).fill(5),
+      borderColor: GREY,
+      borderDash: [5,4],
+      borderWidth: 1,
+      pointRadius: 0,
+      fill: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    scales: {
+      y: { min: 0, max: 10, grid: gridStyle, ticks: tPad },
+      x: { grid: noGrid, ticks: tPad }
+    }
+  }
+});
+
+// ── 2. Rents ──
+const rYrs = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026'];
+const rVal = [845,862,881,907,927,943,969,1027,1163,1310,1380,1430];
+
+new Chart(document.getElementById('rentChart'), {
+  type: 'line',
+  data: {
+    labels: rYrs,
+    datasets: [{
+      label: 'Avg monthly rent (£)',
+      data: rVal,
+      borderColor: RED,
+      borderWidth: 2,
+      tension: 0.35,
+      pointRadius: 0,
+      pointHoverRadius: 4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      y: { min: 600, max: 1600, grid: gridStyle, ticks: { ...tPad, callback: v => '£'+v } },
+      x: { grid: noGrid, ticks: tPad }
+    }
+  }
+});
+
+// ── 3. Housebuilding ──
+const bYrs = ['14/15','15/16','16/17','17/18','18/19','19/20','20/21','21/22','22/23','23/24'];
+const bVal = [170690,189650,217350,222190,241930,243770,216490,232820,234400,221070];
+
+new Chart(document.getElementById('buildChart'), {
+  type: 'bar',
+  data: {
+    labels: bYrs,
+    datasets: [{
+      label: 'Net additions',
+      data: bVal,
+      backgroundColor: BLUE,
+      borderRadius: 1,
+      barPercentage: 0.65
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      y: { min: 0, max: 400000, grid: gridStyle, ticks: { ...tPad, callback: v => (v/1000)+'k' } },
+      x: { grid: noGrid, ticks: tPad }
+    },
+    plugins: { legend: { display: false } }
+  },
+  plugins: [{
+    id: 'target',
+    afterDraw(chart) {
+      const y = chart.scales.y.getPixelForValue(370000);
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.setLineDash([5,4]);
+      ctx.strokeStyle = RED;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(chart.chartArea.left, y);
+      ctx.lineTo(chart.chartArea.right, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = RED;
+      ctx.font = "500 12px 'Source Sans 3'";
+      ctx.textAlign = 'right';
+      ctx.fillText('Target: 370k', chart.chartArea.right, y - 6);
+      ctx.restore();
+    }
+  }]
+});
+
+// ── 4. Mortgage rates ──
+const mYrs = ['2019','2020','2021','2022','2023','2024','2025','2026'];
+const m2yr = [2.5, 2.3, 2.2, 4.5, 5.8, 5.6, 5.5, 5.88];
+const m5yr = [2.7, 2.5, 2.4, 4.2, 5.4, 5.3, 5.2, 5.77];
+
+new Chart(document.getElementById('mortgageChart'), {
+  type: 'line',
+  data: {
+    labels: mYrs,
+    datasets: [{
+      label: 'Average 2-year fix',
+      data: m2yr,
+      borderColor: RED,
+      borderWidth: 2,
+      tension: 0.35,
+      pointRadius: 0,
+      pointHoverRadius: 4
+    },{
+      label: 'Average 5-year fix',
+      data: m5yr,
+      borderColor: BLUE,
+      borderWidth: 2,
+      tension: 0.35,
+      pointRadius: 0,
+      pointHoverRadius: 4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    scales: {
+      y: { min: 0, max: 7, grid: gridStyle, ticks: { ...tPad, callback: v => v+'%' } },
+      x: { grid: noGrid, ticks: tPad }
+    }
+  }
+});
+
+// ── 5. Tenure ──
+const tYrs = ['03/04','05/06','07/08','09/10','11/12','13/14','15/16','17/18','19/20','21/22','23/24'];
+const own = [71,70,68,67,65,63,63,63,64,65,64];
+const pvt = [11,12,14,16,18,19,20,20,19,19,20];
+const soc = [18,18,18,17,17,17,17,17,17,16,16];
+
+new Chart(document.getElementById('tenureChart'), {
+  type: 'line',
+  data: {
+    labels: tYrs,
+    datasets: [{
+      label: 'Owner-occupied',
+      data: own,
+      borderColor: BLUE,
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 2,
+      pointBackgroundColor: BLUE
+    },{
+      label: 'Private rented',
+      data: pvt,
+      borderColor: RED,
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 2,
+      pointBackgroundColor: RED
+    },{
+      label: 'Social rented',
+      data: soc,
+      borderColor: GOLD,
+      borderWidth: 1.5,
+      tension: 0.3,
+      pointRadius: 2,
+      pointBackgroundColor: GOLD
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    scales: {
+      y: { min: 0, max: 80, grid: gridStyle, ticks: { ...tPad, callback: v => v+'%' } },
+      x: { grid: noGrid, ticks: tPad }
+    }
+  }
+});
+
+// ── 6. Region table ──
+const regions = [
+  { name: 'London', r: 10.5 },
+  { name: 'South East', r: 9.1 },
+  { name: 'East of England', r: 8.2 },
+  { name: 'South West', r: 8.0 },
+  { name: 'England', r: 7.6 },
+  { name: 'West Midlands', r: 6.5 },
+  { name: 'East Midlands', r: 6.4 },
+  { name: 'Wales', r: 6.0 },
+  { name: 'North West', r: 5.8 },
+  { name: 'Yorkshire & Humber', r: 5.7 },
+  { name: 'North East', r: 5.0 }
+];
+const maxR = 10.5;
+const tb = document.querySelector('#regionTable tbody');
+regions.forEach(reg => {
+  const w = (reg.r / maxR) * 120;
+  const isBold = reg.name === 'England';
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td style="${isBold ? 'font-weight:700' : ''}">${reg.name}</td><td class="val">${reg.r}</td><td class="bar-cell"><span class="ratio-bar" style="width:${w}px"></span></td>`;
+  tb.appendChild(tr);
+});
+
+// ── 7. First-time buyers ──
+const fYrs = ['2007','2009','2011','2013','2015','2017','2019','2021','2023','2025'];
+const fAge = [29,29,30,30,30,31,31,32,32,33];
+const fDep = [26,30,27,27,30,33,47,57,53,56];
+
+new Chart(document.getElementById('ftbChart'), {
+  type: 'bar',
+  data: {
+    labels: fYrs,
+    datasets: [{
+      label: 'Avg deposit (£k)',
+      data: fDep,
+      backgroundColor: 'rgba(33,102,172,0.5)',
+      borderRadius: 1,
+      barPercentage: 0.45,
+      yAxisID: 'y'
+    },{
+      label: 'Median age',
+      data: fAge,
+      borderColor: RED,
+      borderWidth: 2,
+      type: 'line',
+      tension: 0.3,
+      pointRadius: 3,
+      pointBackgroundColor: RED,
+      yAxisID: 'y1'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    scales: {
+      y: { position: 'left', min: 0, max: 70, grid: gridStyle, ticks: { ...tPad, callback: v => '£'+v+'k' } },
+      y1: { position: 'right', min: 26, max: 36, grid: noGrid, ticks: tPad },
+      x: { grid: noGrid, ticks: tPad }
+    }
+  }
+});
+
+// ── 8. Extremes ──
+const eLab = ['Kensington & Chelsea','Westminster','Camden','Hackney','Richmond upon Thames','Elmbridge','St Albans','County Durham','Pendle','Hyndburn'];
+const eVal = [25.2,14.8,14.2,13.6,13.1,12.8,11.9,4.4,4.3,4.1];
+const eCol = eVal.map(v => v > 10 ? RED : GREEN);
+
+new Chart(document.getElementById('extremesChart'), {
+  type: 'bar',
+  data: {
+    labels: eLab,
+    datasets: [{ data: eVal, backgroundColor: eCol, borderRadius: 1, barPercentage: 0.55 }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      x: { min: 0, max: 28, grid: gridStyle, ticks: tPad },
+      y: { grid: noGrid, ticks: { ...tPad, font: { size: 13, weight: '500' } } }
+    },
+    plugins: { legend: { display: false } }
+  }
+});
+</script>
+</body>
+</html>
